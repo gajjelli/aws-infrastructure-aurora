@@ -2,7 +2,7 @@
 # your environment
 env = "uat"
 # aws account number (used while creating topics for sns)
-account_num="951849664683"
+account_num="123456789"
 # ami id you want to base your EC2 instance off
 ami_id="ami-4836a428"
 # which port will your app server running on EC2 be listening to
