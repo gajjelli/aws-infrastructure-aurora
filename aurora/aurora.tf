@@ -20,9 +20,9 @@ variable "apply_immediately" { default = false }
 
 resource "aws_rds_cluster" "aurora_cluster" {
 cluster_identifier            = "${var.env}-aurora-cluster"
-database_name                 = "mydb"
-master_username               = "${var.master_db_name}"
-master_password               = "${var.master_username}"
+database_name                 = "${var.master_db_name}"
+master_username               = "${var.master_username}"
+master_password               = "${var.master_password}"
 backup_retention_period       = 14
 preferred_backup_window       = "01:00-02:00"
 preferred_maintenance_window  = "sun:02:00-sun:04:00"
