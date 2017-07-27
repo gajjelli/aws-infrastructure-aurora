@@ -11,6 +11,9 @@ variable "vpc_security_group_ids" {}
 variable "subnet_public_count" {}
 variable "subnet_private_count" {}
 
+variable "storage_encrypted" { default = true }
+variable "apply_immediately" { default = false }
+
 ########################
 ## Cluster
 ########################
@@ -26,7 +29,10 @@ preferred_maintenance_window  = "sun:02:00-sun:04:00"
 db_subnet_group_name          = "${aws_db_subnet_group.aurora_subnet_group.name}"
 db_cluster_parameter_group_name = "${aws_rds_cluster_parameter_group.aurora_cluster_parameter_group.id}"
 final_snapshot_identifier     = "${var.env}-aurora-cluster"
-vpc_security_group_ids = ["${var.vpc_security_group_ids}"]
+vpc_security_group_ids        = ["${var.vpc_security_group_ids}"]
+storage_encrypted             = "${var.storage_encrypted}"
+kms_key_id                    = "${aws_kms_key.aurora.arn}"
+apply_immediately             = "${var.apply_immediately}"
 
 tags {
 Name         = "${var.env}-Aurora-DB-Cluster"
@@ -92,4 +98,16 @@ resource "aws_rds_cluster_parameter_group" "aurora_cluster_parameter_group" {
 
 output "cluster_address" {
 value = "${aws_rds_cluster.aurora_cluster.address}"
+}
+
+
+resource "aws_kms_key" "aurora" {
+  description = "RDS master key for ${var.env}-aurora}"
+  deletion_window_in_days = 30
+  enable_key_rotation = "true"
+}
+
+resource "aws_kms_alias" "aurora" {
+  name = "alias/${var.env}-rds-key"
+  target_key_id = "${aws_kms_key.aurora.key_id}"
 }
