@@ -24,6 +24,7 @@ backup_retention_period       = 14
 preferred_backup_window       = "01:00-02:00"
 preferred_maintenance_window  = "sun:02:00-sun:04:00"
 db_subnet_group_name          = "${aws_db_subnet_group.aurora_subnet_group.name}"
+db_cluster_parameter_group_name = "${aws_rds_cluster_parameter_group.aurora_cluster_parameter_group.id}"
 final_snapshot_identifier     = "${var.env}-aurora-cluster"
 vpc_security_group_ids = ["${var.vpc_security_group_ids}"]
 
@@ -41,7 +42,7 @@ create_before_destroy = true
 resource "aws_db_subnet_group" "aurora_subnet_group" {
 name          = "${var.env}_aurora_db_subnet_group"
 description   = "Allowed subnets for Aurora DB cluster instances"
-subnet_ids    = ["${var.aws_subnet_public1_id}","${var.aws_subnet_public1_id}"]
+subnet_ids    = ["${var.aws_subnet_public1_id}","${var.aws_subnet_public2_id}"]
 tags {
 Name         = "${var.env}-Aurora-DB-Subnet-Group"
 VPC          = "${var.vpc_main_name}"
@@ -56,6 +57,7 @@ identifier            = "${var.env}-aurora-instance-${count.index}"
 cluster_identifier    = "${aws_rds_cluster.aurora_cluster.id}"
 instance_class        = "db.t2.small"
 db_subnet_group_name  = "${aws_db_subnet_group.aurora_subnet_group.name}"
+db_parameter_group_name = "${aws_db_parameter_group.aurora_parameter_group.id}"
 publicly_accessible   = true
 tags {
 Name         = "${var.env}-Aurora-DB-Instance-${count.index}"
@@ -66,6 +68,26 @@ Environment  = "${var.env}"
 lifecycle {
 create_before_destroy = true
     }
+}
+
+resource "aws_db_parameter_group" "aurora_parameter_group" {
+  name        = "tf-rds1-${var.env}"
+  family      = "aurora5.6"
+  description = "Terraform-managed parameter group for tf-rds1-${var.env}"
+
+  tags {
+    Name = "tf-rds1-${var.env}"
+  }
+}
+
+resource "aws_rds_cluster_parameter_group" "aurora_cluster_parameter_group" {
+  name        = "tf-rds1-${var.env}"
+  family      = "aurora5.6"
+  description = "Terraform-managed cluster parameter group for tf-rds1-${var.env}"
+
+  tags {
+    Name = "tf-rds1-${var.env}"
+  }
 }
 
 output "cluster_address" {
